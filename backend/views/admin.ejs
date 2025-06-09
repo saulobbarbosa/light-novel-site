@@ -1,0 +1,152 @@
+<%- include('partials/header') %>
+
+<div class="max-w-6xl mx-auto">
+    <h1 class="text-3xl sm:text-4xl font-bold text-white mb-8">Painel do Administrador</h1>
+
+    <!-- Abas de Navegação -->
+    <div class="mb-8 border-b border-gray-700">
+        <nav class="flex flex-wrap gap-2 sm:gap-4" aria-label="Tabs">
+            <a href="/admin?page=createNovel" class="<%= page === 'createNovel' ? 'bg-purple-600 text-white' : 'text-gray-300 hover:text-white' %> px-3 py-2 font-medium text-sm rounded-md">
+                Criar Nova Obra
+            </a>
+            <a href="/admin?page=addChapter" class="<%= page === 'addChapter' ? 'bg-purple-600 text-white' : 'text-gray-300 hover:text-white' %> px-3 py-2 font-medium text-sm rounded-md">
+                Adicionar Capítulo
+            </a>
+            <a href="/admin?page=manageUsers" class="<%= page === 'manageUsers' ? 'bg-purple-600 text-white' : 'text-gray-300 hover:text-white' %> px-3 py-2 font-medium text-sm rounded-md">
+                Gerenciar Usuários
+            </a>
+        </nav>
+    </div>
+    
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="bg-red-500 text-white p-3 rounded mb-4"><%= error %></div>
+    <% } %>
+
+    <!-- Conteúdo da Aba: Criar Nova Obra -->
+    <% if (page === 'createNovel') { %>
+    <div id="createNovel" class="bg-gray-800 p-4 sm:p-8 rounded-lg shadow-xl">
+        <h2 class="text-2xl font-bold text-white mb-6">Cadastrar Nova Obra</h2>
+        <form action="/novels" method="POST" enctype="multipart/form-data">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="mb-4">
+                    <label for="title" class="block text-gray-300 mb-2">Título da Obra</label>
+                    <input type="text" name="title" class="w-full bg-gray-700 text-white p-2 rounded border border-gray-600" required>
+                </div>
+                <div class="mb-4">
+                    <label for="synopsis" class="block text-gray-300 mb-2">Sinopse</label>
+                    <textarea name="synopsis" rows="5" class="w-full bg-gray-700 text-white p-2 rounded border border-gray-600" required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="coverImage" class="block text-gray-300 mb-2">Imagem de Capa</label>
+                    <input type="file" name="coverImage" class="w-full text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-gray-600 file:text-white" required>
+                </div>
+                 <div class="mb-4">
+                    <label for="bannerImage" class="block text-gray-300 mb-2">Imagem de Banner</label>
+                    <input type="file" name="bannerImage" class="w-full text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-gray-600 file:text-white" required>
+                </div>
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-300 mb-2">Gêneros</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                    <% genres.forEach(genre => { %>
+                        <div>
+                            <input type="checkbox" id="<%= genre %>" name="genres" value="<%= genre %>" class="form-checkbox h-5 w-5 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500">
+                            <label for="<%= genre %>" class="ml-2 text-gray-300"><%= genre %></label>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded transition duration-300">Publicar Obra</button>
+        </form>
+    </div>
+    <% } %>
+
+    <!-- Conteúdo da Aba: Adicionar Capítulo -->
+    <% if (page === 'addChapter') { %>
+    <div class="bg-gray-800 p-4 sm:p-8 rounded-lg shadow-xl">
+        <h2 class="text-2xl font-bold text-white mb-6">Publicar Novo Capítulo</h2>
+        <form action="/novels/chapters" method="POST" enctype="multipart/form-data">
+            <div class="mb-4">
+                <label for="novelId" class="block text-gray-300 mb-2">Selecione a Obra</label>
+                <select name="novelId" class="w-full bg-gray-700 text-white p-2 rounded border border-gray-600" required>
+                    <option value="" disabled selected>Escolha uma obra...</option>
+                    <% novels.forEach(novel => { %>
+                        <option value="<%= novel._id %>"><%= novel.title %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="title" class="block text-gray-300 mb-2">Título do Capítulo</label>
+                <input type="text" name="title" class="w-full bg-gray-700 text-white p-2 rounded border border-gray-600" required>
+            </div>
+            <div class="mb-4">
+                <label for="chapterImages" class="block text-gray-300 mb-2">Imagens do Capítulo (Opcional)</label>
+                <input type="file" name="chapterImages" multiple class="w-full text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-gray-600 file:text-white">
+                <p class="text-xs text-gray-400 mt-1">Para inserir as imagens no texto, use as tags [IMAGEM_1], [IMAGEM_2], etc., na ordem em que foram selecionadas.</p>
+            </div>
+            <div class="mb-6">
+                <label for="content" class="block text-gray-300 mb-2">Conteúdo do Capítulo (Texto)</label>
+                <textarea name="content" rows="20" class="w-full bg-gray-700 text-white p-2 rounded border border-gray-600" placeholder="Cole o texto do capítulo aqui..."></textarea>
+            </div>
+            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded transition duration-300">Publicar Capítulo</button>
+        </form>
+    </div>
+    <% } %>
+    
+    <!-- Conteúdo da Aba: Gerenciar Usuários -->
+   <% if (page === 'manageUsers') { %>
+    <div class="bg-gray-800 p-4 sm:p-8 rounded-lg shadow-xl">
+        <h2 class="text-2xl font-bold text-white mb-6">Lista de Usuários</h2>
+        
+        <!-- Tabela para Telas Maiores -->
+        <div class="hidden md:block overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-700">
+                <thead class="bg-gray-700">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Usuário</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Cargo</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-gray-800 divide-y divide-gray-700">
+                    <% users.forEach(u => { %>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap"><div class="flex items-center"><div class="flex-shrink-0 h-10 w-10"><img class="h-10 w-10 rounded-full object-cover" src="<%= u.profilePicture %>" alt=""></div><div class="ml-4"><div class="text-sm font-medium text-white"><%= u.username %></div></div></div></td>
+                            <td class="px-6 py-4 whitespace-nowrap"><% if (u.role === 'admin') { %><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-200 text-purple-800">Admin</span><% } else { %><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-200 text-green-800">Usuário</span><% } %></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex items-center gap-4">
+                                    <form action="/users/<%= u._id %>/role?_method=PUT" method="POST"><input type="hidden" name="_method" value="PUT"><% if (u.role === 'admin') { %><input type="hidden" name="role" value="user"><button type="submit" class="text-yellow-400 hover:text-yellow-300">Rebaixar</button><% } else { %><input type="hidden" name="role" value="admin"><button type="submit" class="text-green-400 hover:text-green-300">Promover</button><% } %></form>
+                                    <form action="/users/<%= u._id %>" method="POST" onsubmit="return confirm('Deseja mesmo excluir o usuário <%= u.username %>?');">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <button type="submit" class="text-red-500 hover:text-red-400">Excluir</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Cards para Telas Pequenas -->
+        <div class="md:hidden space-y-4">
+            <% users.forEach(u => { %>
+                <div class="bg-gray-700 p-4 rounded-lg shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center"><img class="h-12 w-12 rounded-full object-cover" src="<%= u.profilePicture %>" alt=""><div class="ml-4"><p class="text-base font-bold text-white"><%= u.username %></p><% if (u.role === 'admin') { %><p class="text-xs text-purple-400">Administrador</p><% } else { %><p class="text-xs text-green-400">Usuário</p><% } %></div></div>
+                    </div>
+                    <div class="flex justify-end gap-4">
+                         <form action="/users/<%= u._id %>/role?_method=PUT" method="POST"><input type="hidden" name="_method" value="PUT"><% if (u.role === 'admin') { %><input type="hidden" name="role" value="user"><button type="submit" class="text-xs bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded">Rebaixar</button><% } else { %><input type="hidden" name="role" value="admin"><button type="submit" class="text-xs bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">Promover</button><% } %></form>
+                         <form action="/users/<%= u._id %>" method="POST" onsubmit="return confirm('Deseja mesmo excluir o usuário <%= u.username %>?');">
+                             <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="text-xs bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">Excluir</button>
+                        </form>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>

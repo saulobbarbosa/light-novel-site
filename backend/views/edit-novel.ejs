@@ -1,0 +1,62 @@
+<%- include('partials/header') %>
+
+<div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg shadow-xl">
+    <h1 class="text-3xl font-bold text-white mb-6">Editar Obra</h1>
+    
+    <form id="edit-novel-form" action="/novels/<%= novel._id %>" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="_method" value="PUT">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+            <div>
+                <label for="title" class="block text-gray-300 mb-2">Título da Obra</label>
+                <input type="text" name="title" value="<%= novel.title %>" class="w-full bg-gray-700 text-white p-2 rounded border border-gray-600" required>
+            </div>
+            <div>
+                <label for="synopsis" class="block text-gray-300 mb-2">Sinopse</label>
+                <textarea name="synopsis" rows="8" class="w-full bg-gray-700 text-white p-2 rounded border border-gray-600" required><%= novel.synopsis %></textarea>
+            </div>
+            <div>
+                <label for="coverImage" class="block text-gray-300 mb-2">Nova Imagem de Capa (Opcional)</label>
+                <input type="file" name="coverImage" class="w-full text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-gray-600 file:text-white">
+                <img src="<%= novel.coverImage %>" alt="Capa Atual" class="w-32 mt-2 rounded">
+            </div>
+             <div>
+                <label for="bannerImage" class="block text-gray-300 mb-2">Nova Imagem de Banner (Opcional)</label>
+                <input type="file" name="bannerImage" class="w-full text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-gray-600 file:text-white">
+                <img src="<%= novel.bannerImage %>" alt="Banner Atual" class="w-full h-24 object-cover mt-2 rounded">
+            </div>
+        </div>
+        <div class="mb-6">
+            <label class="block text-gray-300 mb-2">Gêneros</label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                <% genres.forEach(genre => { %>
+                    <% const isChecked = novel.genres.includes(genre); %>
+                    <div>
+                        <input type="checkbox" id="<%= genre %>" name="genres" value="<%= genre %>" <%= isChecked ? 'checked' : '' %> class="form-checkbox h-5 w-5 text-purple-600 bg-gray-700 border-gray-600 rounded">
+                        <label for="<%= genre %>" class="ml-2 text-gray-300"><%= genre %></label>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+    </form>
+    
+    <!-- Formulário de exclusão separado -->
+    <form id="delete-novel-form" action="/novels/<%= novel._id %>" method="POST">
+        <input type="hidden" name="_method" value="DELETE">
+    </form>
+
+    <div class="mt-8 flex flex-col sm:flex-row-reverse sm:justify-start items-center gap-4">
+        <button type="submit" form="edit-novel-form" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300">Salvar Alterações</button>
+        <a href="/novels/<%= novel._id %>" class="w-full sm:w-auto text-center bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded transition duration-300">Cancelar</a>
+        <button id="delete-novel-button" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300 sm:mr-auto">Excluir Obra</button>
+    </div>
+</div>
+
+<script>
+    document.getElementById('delete-novel-button').addEventListener('click', function(e) {
+        e.preventDefault();
+        onConfirmCallback = () => document.getElementById('delete-novel-form').submit();
+        showModal('Confirmar Exclusão', 'Tem certeza que deseja excluir esta obra e todos os seus capítulos? Esta ação é irreversível.', 'Sim, Excluir', 'Cancelar');
+    });
+</script>
+
+<%- include('partials/footer') %>

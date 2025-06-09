@@ -1,0 +1,53 @@
+/* Estilos personalizados para complementar o Tailwind CSS */
+
+/* Garante que o body use flexbox para o sticky footer */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Garante que o conteúdo principal cresça para empurrar o footer para baixo */
+main.flex-grow {
+    flex-grow: 1;
+}
+
+/* Estilizando a scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a202c; /* bg-gray-800 */
+}
+
+::-webkit-scrollbar-thumb {
+    background: #805ad5; /* purple-600 */
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #6b46c1; /* purple-700 */
+}
+
+/* Estilos para o conteúdo do capítulo gerado pelo EJS */
+.prose {
+    font-size: 1.125rem; /* text-lg */
+    line-height: 1.75;
+}
+
+.prose-invert {
+    color: #d1d5db; /* text-gray-300 */
+}
+
+.prose p {
+    margin-bottom: 1em;
+}
+
+/* --- ESTILOS PARA O MODAL PERSONALIZADO --- */
+.modal-overlay {
+    transition: opacity 0.3s ease;
+}
+.modal-container {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}

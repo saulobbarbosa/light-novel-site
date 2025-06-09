@@ -1,0 +1,14 @@
+# Dependências que serão instaladas dentro do container
+node_modules
+
+# Arquivos de configuração do Docker
+Dockerfile
+docker-compose.yml
+
+# Arquivo de variáveis de ambiente
+.env
+
+# Metadados do Git e do npm
+.git
+.gitignore
+npm-debug.log

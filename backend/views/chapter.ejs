@@ -1,0 +1,54 @@
+<%- include('partials/header') %>
+
+<div class="max-w-4xl mx-auto bg-gray-800 p-4 md:p-10 rounded-lg shadow-xl">
+    <div class="text-center mb-8">
+        <a href="/novels/<%= novel._id %>" class="text-purple-400 hover:text-purple-300 text-2xl font-bold"><%= novel.title %></a>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-white mt-2"><%= chapter.title %></h1>
+         <% if (user && user.role === 'admin') { %>
+            <a href="/novels/chapters/<%= chapter._id %>/edit" class="inline-block mt-4 bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded text-sm transition duration-300">Editar Capítulo</a>
+        <% } %>
+    </div>
+
+    <!-- Navegação de Capítulos -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+        <% if (prevChapter) { %>
+            <a href="/novels/<%= novel._id %>/chapters/<%= prevChapter._id %>" class="w-full sm:w-auto text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300">&larr; Anterior</a>
+        <% } else { %>
+            <span class="w-full sm:w-auto text-center bg-gray-600 text-gray-400 font-bold py-2 px-4 rounded cursor-not-allowed">&larr; Anterior</span>
+        <% } %>
+        <a href="/novels/<%= novel._id %>" class="w-full sm:w-auto text-center bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded transition duration-300">Índice</a>
+        <% if (nextChapter) { %>
+            <a href="/novels/<%= novel._id %>/chapters/<%= nextChapter._id %>" class="w-full sm:w-auto text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300">Próximo &rarr;</a>
+        <% } else { %>
+            <span class="w-full sm:w-auto text-center bg-gray-600 text-gray-400 font-bold py-2 px-4 rounded cursor-not-allowed">Próximo &rarr;</span>
+        <% } %>
+    </div>
+
+    <!-- Conteúdo do Capítulo (Renderização Atualizada) -->
+    <div class="prose prose-lg prose-invert max-w-none text-gray-300 leading-relaxed text-lg">
+        <% chapter.content.forEach(block => { %>
+            <% if (block.type === 'text') { %>
+                <p><%- block.value.replace(/\n/g, '<br>') %></p>
+            <% } else if (block.type === 'image') { %>
+                <img src="<%= block.value %>" alt="Imagem do capítulo" class="my-6 rounded-lg shadow-lg mx-auto max-w-full h-auto">
+            <% } %>
+        <% }) %>
+    </div>
+    
+     <!-- Navegação de Capítulos (Fim) -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-12">
+        <% if (prevChapter) { %>
+            <a href="/novels/<%= novel._id %>/chapters/<%= prevChapter._id %>" class="w-full sm:w-auto text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300">&larr; Anterior</a>
+        <% } else { %>
+            <span class="w-full sm:w-auto text-center bg-gray-600 text-gray-400 font-bold py-2 px-4 rounded cursor-not-allowed">&larr; Anterior</span>
+        <% } %>
+         <a href="/novels/<%= novel._id %>" class="w-full sm:w-auto text-center bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded transition duration-300">Índice</a>
+        <% if (nextChapter) { %>
+            <a href="/novels/<%= novel._id %>/chapters/<%= nextChapter._id %>" class="w-full sm:w-auto text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300">Próximo &rarr;</a>
+        <% } else { %>
+            <span class="w-full sm:w-auto text-center bg-gray-600 text-gray-400 font-bold py-2 px-4 rounded cursor-not-allowed">Próximo &rarr;</span>
+        <% } %>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

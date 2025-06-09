@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  # Nome do serviço da sua aplicação
+  light-novel-app:
+    # Constrói a imagem a partir do Dockerfile no diretório atual (.)
+    # O Docker irá automaticamente construir para a arquitetura da sua máquina (amd64 ou arm64)
+    build: .
+    # Reinicia o container automaticamente se ele falhar
+    restart: unless-stopped
+    # Carrega as variáveis de ambiente do seu arquivo .env local
+    env_file:
+      - ./backend/.env
+    # Mapeia a porta 7080 do seu computador para a porta 7080 do container
+    ports:
+      - "7080:7080"
+    # Define um volume para persistir os dados da pasta de uploads
+    # Isso garante que as imagens enviadas não sejam perdidas se o container for recriado
+    volumes:
+      - ./public/uploads:/app/public/uploads
+    # (Opcional) Descomente a linha abaixo para forçar uma arquitetura específica.
+    # Útil se você está em um Mac M1/M2 (arm64) e quer rodar a versão para servidores Intel (amd64).
+    platform: linux/amd64

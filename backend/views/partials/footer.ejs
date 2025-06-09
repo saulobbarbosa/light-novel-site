@@ -1,0 +1,75 @@
+    </main>
+    <footer class="bg-gray-800 mt-12">
+        <div class="container mx-auto py-4 px-4 sm:px-6 lg:px-8 text-center text-gray-400">
+            &copy; 2025 Novel Mania. Todos os direitos reservados.
+        </div>
+    </footer>
+
+    <!-- Modal Personalizado -->
+    <div id="custom-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div class="modal-container bg-gray-800 rounded-lg shadow-xl w-full max-w-md p-6 transform scale-95 opacity-0">
+            <h3 id="modal-title" class="text-xl font-bold text-white mb-4"></h3>
+            <p id="modal-message" class="text-gray-300 mb-6"></p>
+            <div id="modal-buttons" class="flex justify-end gap-4">
+                <!-- Botões serão inseridos aqui via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Lógica do Modal
+        const modal = document.getElementById('custom-modal');
+        const modalContainer = modal.querySelector('.modal-container');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalButtons = document.getElementById('modal-buttons');
+
+        let onConfirmCallback = null;
+
+        function showModal(title, message, confirmText = null, cancelText = 'Fechar') {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modalButtons.innerHTML = ''; // Limpa botões antigos
+
+            // Botão de Cancelar/Fechar
+            const cancelButton = document.createElement('button');
+            cancelButton.textContent = cancelText;
+            cancelButton.className = 'bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded transition duration-300';
+            cancelButton.onclick = hideModal;
+            
+            if (confirmText) {
+                // É uma caixa de confirmação
+                const confirmButton = document.createElement('button');
+                confirmButton.textContent = confirmText;
+                confirmButton.className = 'bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300';
+                confirmButton.onclick = () => {
+                    if (onConfirmCallback) onConfirmCallback();
+                    hideModal();
+                };
+                modalButtons.appendChild(confirmButton);
+            }
+            
+            modalButtons.appendChild(cancelButton);
+            
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modalContainer.classList.remove('scale-95', 'opacity-0');
+        }
+
+        function hideModal() {
+            modal.classList.add('opacity-0');
+            modalContainer.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('pointer-events-none');
+                onConfirmCallback = null; // Limpa o callback
+            }, 300); // Espera a transição terminar
+        }
+        
+        // Fechar ao clicar fora
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                hideModal();
+            }
+        });
+    </script>
+</body>
+</html>
