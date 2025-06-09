@@ -15,7 +15,7 @@ services:
       - ./backend/.env
     # Mapeia a porta 3000 do seu computador para a porta 3000 do container
     ports:
-      - "3000:3000"
+      - "7080:7080"
     # Define um volume para persistir os dados da pasta de uploads
     # Isso garante que as imagens enviadas não sejam perdidas se o container for recriado
     volumes:
