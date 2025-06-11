@@ -56,9 +56,11 @@
                 </div>
                 <ul id="chapter-list" class="space-y-2">
                     <% if (novel.chapters && novel.chapters.length > 0) { %>
-                        <% novel.chapters.sort((a, b) => b.chapterNumber - a.chapterNumber).forEach(chapter => { %>
+                        <!-- Alteração 1: Ordenação inicial por título decrescente -->
+                        <% novel.chapters.sort((a, b) => b.title.localeCompare(a.title, undefined, { numeric: true, sensitivity: 'base' })).forEach(chapter => { %>
                             <% const isRead = readChapters.has(chapter._id.toString()); %>
-                            <li data-chapter-number="<%= chapter.chapterNumber %>">
+                            <!-- Alteração 2: Adicionado data-chapter-title para o script -->
+                            <li data-chapter-title="<%= chapter.title %>">
                                 <div class="flex justify-between items-center p-3 rounded transition duration-300 <%= isRead ? 'bg-purple-900 hover:bg-purple-800' : 'bg-gray-700 hover:bg-purple-800' %>">
                                     <a href="/novels/<%= novel._id %>/chapters/<%= chapter._id %>" class="flex-grow <%= isRead ? 'text-gray-400' : 'text-gray-200' %>">
                                         <span><%= chapter.title %></span>
@@ -89,22 +91,35 @@
 
 <%- include('partials/footer') %>
 
+<!-- Alteração 3: Script de ordenação atualizado para usar títulos -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const sortButton = document.getElementById('sort-button');
         const chapterList = document.getElementById('chapter-list');
-        let isDescending = true; 
+        // A página é renderizada inicialmente em ordem decrescente por título
+        let currentSortIsDescending = true; 
 
         sortButton.addEventListener('click', function() {
             const items = Array.from(chapterList.getElementsByTagName('li'));
+            
+            // Inverte a direção da ordenação para o próximo clique
+            currentSortIsDescending = !currentSortIsDescending;
+
             items.sort(function(a, b) {
-                const numA = parseInt(a.getAttribute('data-chapter-number'), 10);
-                const numB = parseInt(b.getAttribute('data-chapter-number'), 10);
-                return isDescending ? (numA - numB) : (numB - numA);
+                const titleA = a.dataset.chapterTitle;
+                const titleB = b.dataset.chapterTitle;
+                
+                // Usa localeCompare com a opção 'numeric' para ordenar corretamente números dentro do texto
+                if (currentSortIsDescending) {
+                    return titleB.localeCompare(titleA, undefined, { numeric: true, sensitivity: 'base' });
+                } else {
+                    return titleA.localeCompare(titleB, undefined, { numeric: true, sensitivity: 'base' });
+                }
             });
+
+            // Limpa a lista e adiciona os itens na nova ordem
             chapterList.innerHTML = '';
             items.forEach(item => chapterList.appendChild(item));
-            isDescending = !isDescending;
         });
     });
 </script>
