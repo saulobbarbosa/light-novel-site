@@ -4,7 +4,7 @@
     <h1 class="text-3xl font-bold text-white mb-2">Editar Capítulo</h1>
     <a href="/novels/<%= chapter.novel._id %>" class="text-purple-400 hover:text-purple-300 mb-6 block"><%= chapter.novel.title %></a>
     
-    <form id="edit-chapter-form" action="/novels/chapters/<%= chapter._id %>?_method=PUT" method="POST" enctype="multipart/form-data">
+    <form id="edit-chapter-form" action="/novels/chapters/<%= chapter._id %>?_method=PUT" method="PUT" enctype="multipart/form-data">
         <input type="hidden" name="_method" value="PUT">
         <div class="mb-4">
             <label for="title" class="block text-gray-300 mb-2">Título do Capítulo</label>
