@@ -36,7 +36,7 @@ router.get('/chapters/:chapterId/edit', protect, admin, showEditChapterForm);
 router.post('/chapters/:chapterId', protect, admin, upload.array('chapterImages', 10), updateChapter);
 
 // Rota para deletar capítulo
-router.post('/chapters/:chapterId', protect, admin, deleteChapter);
+router.delete('/chapters/:chapterId', protect, admin, deleteChapter);
 
 // Rota para ler um capítulo
 router.get('/:novelId/chapters/:chapterId', getChapterContent);
