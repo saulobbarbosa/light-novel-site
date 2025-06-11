@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const User = require('./models/User');
 const multer = require('multer');
+const upload = multer();
 
 const app = express();
 const PORT = process.env.PORT || 7080;
