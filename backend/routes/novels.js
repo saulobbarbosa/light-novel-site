@@ -33,7 +33,20 @@ router.delete('/:id', protect, admin, deleteNovel);
 router.get('/chapters/:chapterId/edit', protect, admin, showEditChapterForm);
 
 // Rota para atualizar capítulo (permite até 10 imagens)
-router.put('/chapters/:chapterId', protect, admin, upload.array('chapterImages', 10), updateChapter);
+router.post('/chapters/:chapterId',
+    protect,
+    admin,
+    upload.array('chapterImages', 10),
+    methodOverride(function (req, res) {
+        if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+            var method = req.body._method;
+            delete req.body._method;
+            return method;
+        }
+    }),
+    updateChapter
+);
+
 
 // Rota para deletar capítulo
 router.delete('/chapters/:chapterId', protect, admin, deleteChapter);

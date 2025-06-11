@@ -9,8 +9,6 @@ const methodOverride = require('method-override');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const User = require('./models/User');
-const multer = require('multer');
-const upload = multer();
 
 const app = express();
 const PORT = process.env.PORT || 7080;
@@ -36,7 +34,6 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 // --- CORREÇÃO DO METHOD-OVERRIDE APLICADA AQUI ---
 // Configuração mais robusta para ler _method a partir do corpo do formulário.
 // Isso garante que POSTs possam ser tratados como PUT ou DELETE.
-app.use(upload.any()); 
 app.use(methodOverride(function (req, res) {
   if (req.body && typeof req.body === 'object' && '_method' in req.body) {
     var method = req.body._method;
