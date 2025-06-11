@@ -5,7 +5,7 @@ services:
   light-novel-app:
     # A chave "platform" resolve erros de 'exec format error'.
     # Garante que o Docker construa a imagem para a arquitetura correta.
-    platform: linux/amd64
+    platform: linux/arm64
     # Constrói a imagem a partir do Dockerfile no diretório atual (.)
     build: .
     # Reinicia o container automaticamente se ele falhar
