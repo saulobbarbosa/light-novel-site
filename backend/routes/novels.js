@@ -26,14 +26,14 @@ router.get('/:id', getNovelDetails);
 
 // --- ROTAS DE EDIÇÃO E EXCLUSÃO ---
 router.get('/:id/edit', protect, admin, showEditNovelForm);
-router.post('/:id', protect, admin, upload.fields([{ name: 'coverImage', maxCount: 1 }, { name: 'bannerImage', maxCount: 1 }]), updateNovel);
-router.post('/:id', protect, admin, deleteNovel);
+router.put('/:id', protect, admin, upload.fields([{ name: 'coverImage', maxCount: 1 }, { name: 'bannerImage', maxCount: 1 }]), updateNovel);
+router.delete('/:id', protect, admin, deleteNovel);
 
 // Rota para formulário de edição de capítulo
 router.get('/chapters/:chapterId/edit', protect, admin, showEditChapterForm);
 
 // Rota para atualizar capítulo (permite até 10 imagens)
-router.post('/chapters/:chapterId', protect, admin, upload.array('chapterImages', 10), updateChapter);
+router.put('/chapters/:chapterId', protect, admin, upload.array('chapterImages', 10), updateChapter);
 
 // Rota para deletar capítulo
 router.delete('/chapters/:chapterId', protect, admin, deleteChapter);

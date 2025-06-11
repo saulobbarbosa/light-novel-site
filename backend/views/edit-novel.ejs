@@ -40,22 +40,22 @@
     </form>
     
     <!-- Formulário de exclusão separado -->
-    <form id="delete-novel-form" action="/novels/<%= novel._id %>" method="POST">
+    <form id="delete-chapter-form" action="/novels/chapters/<%= chapter._id %>" method="POST">
         <input type="hidden" name="_method" value="DELETE">
     </form>
 
     <div class="mt-8 flex flex-col sm:flex-row-reverse sm:justify-start items-center gap-4">
-        <button type="submit" form="edit-novel-form" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300">Salvar Alterações</button>
-        <a href="/novels/<%= novel._id %>" class="w-full sm:w-auto text-center bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded transition duration-300">Cancelar</a>
-        <button id="delete-novel-button" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300 sm:mr-auto">Excluir Obra</button>
+        <button type="submit" form="edit-chapter-form" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300">Salvar Alterações</button>
+        <a href="/novels/<%= chapter.novel._id %>/chapters/<%= chapter._id %>" class="w-full sm:w-auto text-center bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded transition duration-300">Cancelar</a>
+        <button id="delete-chapter-button" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300 sm:mr-auto">Excluir Capítulo</button>
     </div>
 </div>
 
 <script>
-    document.getElementById('delete-novel-button').addEventListener('click', function(e) {
+    document.getElementById('delete-chapter-button').addEventListener('click', function(e) {
         e.preventDefault();
-        onConfirmCallback = () => document.getElementById('delete-novel-form').submit();
-        showModal('Confirmar Exclusão', 'Tem certeza que deseja excluir esta obra e todos os seus capítulos? Esta ação é irreversível.', 'Sim, Excluir', 'Cancelar');
+        onConfirmCallback = () => document.getElementById('delete-chapter-form').submit();
+        showModal('Confirmar Exclusão', 'Tem certeza que deseja excluir este capítulo?', 'Sim, Excluir', 'Cancelar');
     });
 </script>
 
