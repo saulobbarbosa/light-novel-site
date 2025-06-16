@@ -1,4 +1,3 @@
-// Carrega as variáveis de ambiente do arquivo .env
 require('dotenv').config({ path: __dirname + '/.env' });
 
 const express = require('express');
@@ -20,20 +19,71 @@ if (!fs.existsSync(uploadsDir)) {
     console.log(`Diretório de uploads criado em: ${uploadsDir}`);
 }
 
-// Conexão com o MongoDB
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('Conectado ao MongoDB com sucesso!'))
-    .catch(err => console.error('Erro ao conectar ao MongoDB:', err));
+// --- LÓGICA DE CONEXÃO RESILIENTE COM O BANCO DE DADOS ---
+
+// Função para tentar conectar ao MongoDB
+const connectDB = async () => {
+    try {
+        // Tenta conectar com um timeout mais curto para não prender o servidor
+        await mongoose.connect(process.env.MONGO_URI, {
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
+        });
+    } catch (err) {
+        console.error('Falha na tentativa de conexão com o MongoDB:', err.message);
+    }
+};
+
+// Eventos de conexão do Mongoose para monitoramento
+mongoose.connection.on('connected', () => {
+    console.log('Conexão com o MongoDB estabelecida com sucesso.');
+});
+
+mongoose.connection.on('error', err => {
+    console.error('Erro de conexão com o MongoDB:', err.message);
+});
+
+mongoose.connection.on('disconnected', () => {
+    console.warn('MongoDB desconectado.');
+});
+
+// Tenta a conexão inicial ao iniciar o servidor
+connectDB();
+
+// Middleware que verifica a conexão a cada requisição
+const checkDbConnection = async (req, res, next) => {
+    // readyState: 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+    if (mongoose.connection.readyState === 1) {
+        return next(); // Se já estiver conectado, continua
+    }
+
+    console.warn('Conexão com o banco de dados perdida. Tentando reconectar...');
+    await connectDB();
+
+    if (mongoose.connection.readyState === 1) {
+        console.log('Reconexão bem-sucedida!');
+        return next(); // Continua após reconexão
+    }
+
+    // Se a reconexão falhou, exibe uma página de erro amigável
+    res.status(503).send(`
+        <html style="background-color: #111827; color: #d1d5db; font-family: sans-serif; text-align: center; padding: 50px;">
+            <head><title>Erro de Conexão</title></head>
+            <body>
+                <h1 style="color: #c4b5fd;">Serviço Indisponível</h1>
+                <p>Não foi possível estabelecer uma conexão com o banco de dados no momento.</p>
+                <p>Por favor, tente novamente em alguns instantes.</p>
+            </body>
+        </html>
+    `);
+};
+// --- FIM DA LÓGICA DE CONEXÃO ---
 
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '..', 'public')));
-
-// --- CORREÇÃO DO METHOD-OVERRIDE APLICADA AQUI ---
-// Configuração mais robusta para ler _method a partir do corpo do formulário.
-// Isso garante que POSTs possam ser tratados como PUT ou DELETE.
 app.use(methodOverride(function (req, res) {
   if (req.body && typeof req.body === 'object' && '_method' in req.body) {
     var method = req.body._method;
@@ -41,13 +91,12 @@ app.use(methodOverride(function (req, res) {
     return method;
   }
 }));
-// --- FIM DA CORREÇÃO ---
 
 // Configuração do View Engine (EJS)
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Middleware global para dados do usuário
+// Middleware para dados do usuário (é colocado após o check de DB)
 app.use(async (req, res, next) => {
     const token = req.cookies.token;
     if (token) {
@@ -62,6 +111,9 @@ app.use(async (req, res, next) => {
     }
     next();
 });
+
+// Aplica o middleware de verificação de conexão ANTES de todas as rotas
+app.use(checkDbConnection);
 
 // Rotas
 app.use('/', require('./routes/index'));
