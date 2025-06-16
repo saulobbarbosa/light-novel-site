@@ -56,16 +56,15 @@
                 </div>
                 <ul id="chapter-list" class="space-y-2">
                     <%
-                       // Função de ordenação robusta que extrai números dos títulos
                        const sortChapters = (a, b) => {
                            const numA = a.title.match(/\d+/g)?.map(Number) || [0];
                            const numB = b.title.match(/\d+/g)?.map(Number) || [0];
                            for (let i = 0; i < Math.max(numA.length, numB.length); i++) {
                                const valA = numA[i] || 0;
                                const valB = numB[i] || 0;
-                               if (valA !== valB) return valB - valA; // Decrescente
+                               if (valA !== valB) return valB - valA;
                            }
-                           return b.title.localeCompare(a.title); // Fallback para alfabético
+                           return b.title.localeCompare(a.title);
                        };
                     %>
                     <% if (novel.chapters && novel.chapters.length > 0) { %>
@@ -77,15 +76,14 @@
                                         <span><%= chapter.title %></span>
                                     </a>
                                     <% if (isRead) { %>
-                                        <div class="flex items-center space-x-3 ml-4">
-                                            <span class="text-xs font-semibold text-purple-400 hidden sm:inline">LIDO</span>
-                                            <form action="/users/history/remove/<%= chapter._id %>" method="POST" class="flex items-center">
-                                                <button type="submit" title="Marcar como não lido" class="text-gray-500 hover:text-white transition duration-300">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                                    </svg>
-                                                </button>
-                                            </form>
+                                        <div class="read-status-container flex items-center space-x-3 ml-4">
+                                            <span class="read-badge text-xs font-semibold text-purple-400 hidden sm:inline">LIDO</span>
+                                            <!-- ATUALIZADO: Botão para AJAX em vez de formulário -->
+                                            <button type="button" class="mark-unread-button text-gray-500 hover:text-white transition duration-300 flex items-center" data-chapter-id="<%= chapter._id %>" title="Marcar como não lido">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
                                         </div>
                                     <% } %>
                                 </div>
@@ -104,39 +102,81 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const sortButton = document.getElementById('sort-button');
         const chapterList = document.getElementById('chapter-list');
+        const sortButton = document.getElementById('sort-button');
         let currentSortIsDescending = true; 
 
-        // Função de ordenação para o cliente, idêntica à do servidor
         const sortClientChapters = (a, b, isDescending) => {
             const titleA = a.dataset.chapterTitle;
             const titleB = b.dataset.chapterTitle;
-            
             const numA = titleA.match(/\d+/g)?.map(Number) || [0];
             const numB = titleB.match(/\d+/g)?.map(Number) || [0];
-            
             for (let i = 0; i < Math.max(numA.length, numB.length); i++) {
                 const valA = numA[i] || 0;
                 const valB = numB[i] || 0;
-                if (valA !== valB) {
-                    return isDescending ? valB - valA : valA - valB;
-                }
+                if (valA !== valB) return isDescending ? valB - valA : valA - valB;
             }
             return isDescending ? titleB.localeCompare(titleA) : titleA.localeCompare(titleB);
         };
 
-        sortButton.addEventListener('click', function() {
-            const items = Array.from(chapterList.getElementsByTagName('li'));
-            
-            // Inverte a direção da ordenação para o próximo clique
-            currentSortIsDescending = !currentSortIsDescending;
+        if (sortButton) {
+            sortButton.addEventListener('click', function() {
+                const items = Array.from(chapterList.getElementsByTagName('li'));
+                currentSortIsDescending = !currentSortIsDescending;
+                items.sort((a, b) => sortClientChapters(a, b, currentSortIsDescending));
+                chapterList.innerHTML = '';
+                items.forEach(item => chapterList.appendChild(item));
+                // Re-adiciona os event listeners aos novos botões
+                addMarkUnreadListeners();
+            });
+        }
+        
+        // ATUALIZADO: Função para AJAX de marcar como não lido
+        function addMarkUnreadListeners() {
+            document.querySelectorAll('.mark-unread-button').forEach(button => {
+                // Remove listener antigo para evitar duplicação
+                button.replaceWith(button.cloneNode(true));
+            });
+            document.querySelectorAll('.mark-unread-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const chapterId = this.dataset.chapterId;
+                    const listItem = this.closest('li');
+                    const link = listItem.querySelector('a');
+                    const readStatusContainer = listItem.querySelector('.read-status-container');
+                    const mainDiv = listItem.querySelector('div:first-child');
 
-            items.sort((a, b) => sortClientChapters(a, b, currentSortIsDescending));
-
-            // Limpa a lista e adiciona os itens na nova ordem
-            chapterList.innerHTML = '';
-            items.forEach(item => chapterList.appendChild(item));
-        });
+                    fetch(`/users/history/remove/${chapterId}`, {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json' },
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Falha ao marcar como não lido.');
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            if (mainDiv) {
+                                mainDiv.classList.remove('bg-purple-900', 'hover:bg-purple-800');
+                                mainDiv.classList.add('bg-gray-700', 'hover:bg-purple-800');
+                            }
+                            if (link) {
+                                link.classList.remove('text-gray-400');
+                                link.classList.add('text-gray-200');
+                            }
+                            if (readStatusContainer) {
+                                readStatusContainer.remove();
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        showModal('Erro', 'Não foi possível atualizar o status do capítulo.', null, 'Fechar');
+                    });
+                });
+            });
+        }
+        
+        // Adiciona os listeners na carga inicial da página
+        addMarkUnreadListeners();
     });
 </script>

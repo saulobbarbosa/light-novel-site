@@ -77,9 +77,20 @@ exports.clearHistoryEntry = async (req, res) => {
     try {
         const { chapterId } = req.params;
         await User.updateOne({ _id: req.user._id }, { $pull: { history: { chapter: chapterId } } });
-        res.redirect('back');
+
+        // Verifica se a requisição é AJAX para responder com JSON
+        if (req.headers.accept && req.headers.accept.includes('application/json')) {
+            return res.json({ success: true, message: 'Histórico removido.' });
+        } else {
+            return res.redirect('back');
+        }
     } catch (error) {
-        res.status(500).send('Erro ao limpar o histórico');
+        console.error("Erro ao limpar histórico:", error);
+        if (req.headers.accept && req.headers.accept.includes('application/json')) {
+            return res.status(500).json({ success: false, message: 'Erro ao limpar o histórico' });
+        } else {
+            return res.status(500).send('Erro ao limpar o histórico');
+        }
     }
 };
 

@@ -96,21 +96,44 @@ exports.updateChapter = async (req, res) => {
         const chapter = await Chapter.findById(req.params.chapterId);
         if (!chapter) return res.status(404).send('Capítulo não encontrado');
 
-        const oldImages = chapter.content.filter(b => b.type === 'image').map(b => b.value);
-        const newContentArray = processChapterContent(content, req.files);
-        
-        chapter.title = title;
-        chapter.content = newContentArray;
-        await chapter.save();
-        
-        if (req.files && req.files.length > 0) {
+        const hasNewImages = req.files && req.files.length > 0;
+        let newContentArray;
+
+        if (hasNewImages) {
+            // Caso 1: Novas imagens foram enviadas, substitui tudo
+            const oldImages = chapter.content.filter(b => b.type === 'image').map(b => b.value);
+            newContentArray = processChapterContent(content, req.files);
             oldImages.forEach(imageUrl => {
                 const imagePath = path.join(__dirname, '..', '..', 'public', imageUrl);
                 fs.unlink(imagePath, (err) => {
                     if (err) console.error(`Erro ao deletar imagem antiga ${imagePath}:`, err);
                 });
             });
+        } else {
+            // Caso 2: Nenhuma imagem nova, preserva as antigas
+            const oldImageUrls = chapter.content.filter(b => b.type === 'image').map(b => b.value);
+            newContentArray = [];
+            const regex = /\[IMAGEM_(\d+)\]/g;
+            let lastIndex = 0;
+            let match;
+            while ((match = regex.exec(content)) !== null) {
+                if (match.index > lastIndex) {
+                    newContentArray.push({ type: 'text', value: content.substring(lastIndex, match.index) });
+                }
+                const imageIndex = parseInt(match[1], 10) - 1;
+                if (oldImageUrls[imageIndex]) {
+                    newContentArray.push({ type: 'image', value: oldImageUrls[imageIndex] });
+                }
+                lastIndex = regex.lastIndex;
+            }
+            if (lastIndex < content.length) {
+                newContentArray.push({ type: 'text', value: content.substring(lastIndex) });
+            }
         }
+        
+        chapter.title = title;
+        chapter.content = newContentArray;
+        await chapter.save();
         
         res.redirect(`/novels/${chapter.novel}/chapters/${chapter._id}`);
     } catch (error) {
